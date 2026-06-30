@@ -1,0 +1,129 @@
+---
+output:
+  word_document:
+    fig_caption: true
+    fig_height: 10
+    fig_width: 10
+    reference_docx: boot/data/reportTemplate.docx
+    toc: true
+    keep_md: false
+---
+
+
+```{r libraries, include=FALSE}
+library(captioner)
+library(knitr)
+library(pander)
+library(ggplot2)
+library(icesTAF)
+library("stockassessment")
+#library(stockassessment, lib.loc="C:/Users/chen072/software/R_library/")
+library(reshape2)
+library(ggpubr)
+library(RColorBrewer)
+library(colorRamps)
+colset      <- brewer.pal(9, "Set1")
+```
+
+```{r chunk_setup, include=FALSE}
+# CHUNK SETUPS #################################################################
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE,
+                      message=FALSE, results = 'asis')
+```
+
+
+```{r preparation, echo=F, results="hide", message=FALSE,warning=FALSE, comment="", eval=TRUE, prompt=FALSE, fig.show="hide"}
+## load model output
+load("model/SAM_WGNSSK_model_output.RData")
+
+## functions
+source("utilities.R")
+
+```
+
+# Final run
+
+```{r run0, echo=F, results="asis", message=FALSE,warning=FALSE, comment="", eval=T, prompt=FALSE, tidy=TRUE, tidy.opts=list(width.cutoff=60),fig.height=10, fig.width=10, fig.align="center", fig.cap="", fig.pos="htb!"}
+
+myrun  <- run1
+myconf <- conf1
+
+irun <- "final"
+## print AIC
+cat("  \n")
+cat("##### AIC ####  \n")
+cat(paste(round(AIC(myrun), digit=2), "  \n", sep="")) 
+cat("  \n")
+#AIC(myrun)
+
+## ## 11. data ----
+## data availability
+dataplot(myrun)
+
+
+## plot result
+plot(myrun, main=paste0("run ",irun))
+
+## fitplot
+fitplot(myrun)
+
+
+## ob residual
+plot(res, main=paste0("run ",irun))
+
+## pro residual
+plot(resp, main=paste0("run ",irun))
+
+## catchability
+plot_catchability2(myrun)
+
+## observational and N process error SD
+sdplot(myrun)
+
+plot_ob_SD(myrun, myconf)
+
+## plot SD of catchability vs. SD of observation error
+plot_SD_Q_VS_SD_var (myrun, myconf, surveys)
+
+## retro
+plot(re,main=paste0("run ",irun))
+mytab <- data.frame(mohn(re))
+knitr::kable(mytab, row.names = T)
+
+## retro-catchability
+plot_retro_catchability(re, surveys)
+
+## retro-F
+plot_retro_F_at_age(re)
+
+## LOO
+plot(loo,main=paste0("run ",irun))
+
+# n@age ----
+plot_N_at_age(myrun)
+
+## correlation among age
+obscorrplot(myrun)
+corplot(res)
+
+## F@age
+plot_F_at_age(myrun)
+
+fselectivityplot(myrun) 
+
+## F process SD
+plot_F_SD(myrun, myconf)
+
+## catch ----
+## cross-observed
+catchplot(myrun)    
+
+## recruits
+recplot(myrun)                        
+
+# stock recruitment plot
+srplot(myrun) 
+
+
+#}
+```
